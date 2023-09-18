@@ -9,7 +9,7 @@ function Debounce() {
   const [name, setName] = useState("");
   const [calls, setCalls] = useState(0);
 
-  const debouncedValue = useDebounce(name, 500);
+  const debouncedValue = useDebounce(name, 3000);
 
   const query = useQuery<{ results: Character[] }>(
     ["characters-debounce", debouncedValue],

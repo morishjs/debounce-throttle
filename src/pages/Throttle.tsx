@@ -1,60 +1,41 @@
-import { Box, Card, Image, SimpleGrid, Text, Button } from "@mantine/core";
-import { useState } from "react";
-import { useQuery } from "react-query";
-import { fetchCharacters } from "../api";
-import { Character } from "../api/types";
-import useThrottle from "../hooks/useThrottle";
+import {Box, Card, Image, Input, SimpleGrid} from "@mantine/core";
+import {useState} from "react";
+import {useQuery} from "react-query";
+import {fetchCharacters} from "../api";
+import {Character} from "../api/types";
+import {useThrottle} from "react-use";
 
 function Throttle() {
+  const [name, setName] = useState("");
   const [calls, setCalls] = useState(0);
-  const [position, setPosition] = useState(0);
+
+  const throttleValue = useThrottle(name, 3000);
 
   const query = useQuery<{ results: Character[] }>(
-    ["characters-throttle"],
-    () => fetchCharacters("")
+    ["characters-throttle", throttleValue],
+    () => fetchCharacters(throttleValue, setCalls)
   );
 
   const characters = query.data?.results || [];
 
-  function handleScroll() {
-    setCalls((c) => c + 1);
-
-    setPosition(
-      Math.round(
-        ((document.documentElement.scrollTop + document.body.scrollTop) /
-          (document.documentElement.scrollHeight -
-            document.documentElement.clientHeight)) *
-          100
-      )
-    );
-  }
-
-  window.addEventListener("scroll", useThrottle(handleScroll, 1000));
-
   return (
     <Box>
-      <Box
-        sx={() => {
-          return {
-            position: "sticky",
-            top: 0,
-          };
-        }}
-      >
-        <Text size="xl">Calls: {calls}</Text>{" "}
-        <Button onClick={() => setCalls(0)}>Reset calls</Button>
-        <Text size="xl">Position: {position}%</Text>
-      </Box>
+      <Input
+        size="xl"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setName(e.target.value)
+        }
+        placeholder="search"
+      />
 
-      <SimpleGrid
-        cols={1}
-        sx={(theme) => {
-          return {
-            maxWidth: "300px",
-            margin: "0 auto",
-          };
-        }}
-      >
+      <h1>
+        The API has been called {calls} {calls === 1 ? "time" : "times"}
+      </h1>
+
+      <p>Name: {name}</p>
+      <p>throttleValue: {throttleValue}</p>
+
+      <SimpleGrid cols={8}>
         {characters.map((character) => {
           return (
             <Card key={character.id}>
